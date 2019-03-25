@@ -10,10 +10,9 @@ import numpy as np
 import tensorflow as tf
 
 # These should be the only tensorflow classes you need:
-#from tensorflow.keras.models import Sequential
-#from tensorflow.keras.layers import Flatten, Dense, Conv2D, MaxPooling2D
-from keras.models import Sequential
-from keras.layers import Flatten, Dense, Conv2D, MaxPooling2D
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Flatten, Dense, Conv2D, MaxPooling2D
+
 # get_data returns (train_x, train_y), (test_x, test_y)
 # argument determines whether images are shifted to top-left or bottom-right
 # X values are an array of 30x30 images
@@ -67,46 +66,26 @@ def mlp2(train_x, train_y, test1_x, test1_y, test2_x, test2_y):
     model.evaluate(test1_x, test1_y)
     print("Evaluating MLP2 on test set 2")
     return model.evaluate(test2_x, test2_y)
-'''
+
 def cnn(train_x, train_y, test1_x, test1_y, test2_x, test2_y):
+    """
+    Train and evaluate a feedforward network with two hidden layers.
+    """
     # Add a single "channels" dimension at the end
     trn_x = train_x.reshape([-1, 30, 30, 1])
     tst1_x = test1_x.reshape([-1, 30, 30, 1])
     tst2_x = test2_x.reshape([-1, 30, 30, 1])
 
     # First layer will need argument `input_shape=(30,30,1)`
-    conv1 = Conv2D(
-        inputs = [-1,30,30,1]
-        filters = 32,
-        kernel_size = [5,5],
-        padding = "same",
-        activation = tf.nn.relu
-    )
-    pool1 = MaxPooling2D(
-        inputs = conv1,
-        pool_size = [2,2],
-        strides = 2
-        )
-    conv2 = Conv2D(
-        inputs = pool1,
-        filters = 64,
-        kernel_size = [5,5]
-        padding = "same",
-        activation = tf.nn.relu
-    )
-    #------------------瞎几把写的
-    defult_strides = 2
-    #------------------
-    pool2 = MaxPooling2D(
-        inputs = conv2,
-        pool_size = [2,2],
-        #strides = defult_strides
-    )
-
-    #pool2_flat = tf.reshape(pool2, [-1,])
     model = Sequential([
-        #Flatten(input_shape=(30, 30，1)),
-
+        Conv2D(32,kernel_size = (5,5),strides=(1,1), input_shape=(30,30,1)),
+        MaxPooling2D(pool_size = (2,2),strides=(2,2)),
+        Conv2D(64,kernel_size = (5,5)),
+        MaxPooling2D(pool_size = (2,2)),
+        Flatten(),
+        #Flatten(pool2_flat),
+        Dense(512,activation = "relu"),
+        Dense(10, activation = "softmax")
         # TODO: add your implementation here
     ])
 
@@ -119,7 +98,7 @@ def cnn(train_x, train_y, test1_x, test1_y, test2_x, test2_y):
     model.evaluate(tst1_x, test1_y)
     print("Evaluating CNN on test set 2")
     return model.evaluate(tst2_x, test2_y)
-'''
+
 def main():
     (train1_x, train1_y), (test1_x, test1_y) = get_data('top_left')
     (train2_x, train2_y), (test2_x, test2_y) = get_data('bottom_right')
@@ -130,7 +109,7 @@ def main():
 
     mlp1(train1_x, train1_y, test1_x, test1_y, test2_x, test2_y)
     mlp2(train1_x, train1_y, test1_x, test1_y, test2_x, test2_y)
-    #cnn(train1_x, train1_y, test1_x, test1_y, test2_x, test2_y)
+    cnn(train1_x, train1_y, test1_x, test1_y, test2_x, test2_y)
 
 
 if __name__ == '__main__':
